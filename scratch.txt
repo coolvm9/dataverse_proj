@@ -1,0 +1,32 @@
+import requests
+
+# Required parameters
+client_id = 'YOUR_APP_ID'
+client_secret = 'YOUR_CLIENT_SECRET'
+tenant_id = 'YOUR_TENANT_ID'
+environment_url = 'YOUR_ENVIRONMENT_URL'  # Like: https://yourorg.crm.dynamics.com
+api_version = 'v9.2'  # Most common; use your specific version if different
+
+# Step 1: Acquire access token with OAuth2 client credentials
+token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
+scope = f"{environment_url}/.default"
+payload = {
+    'grant_type': 'client_credentials',
+    'client_id': client_id,
+    'client_secret': client_secret,
+    'scope': scope,
+}
+response = requests.post(token_url, data=payload)
+access_token = response.json()['access_token']
+
+# Step 2: Call the Dataverse Web API
+headers = {
+    'Authorization': f'Bearer {access_token}',
+    'OData-MaxVersion': '4.0',
+    'OData-Version': '4.0',
+    'Content-Type': 'application/json; charset=utf-8',
+    'Accept': 'application/json'
+}
+api_url = f"{environment_url}/api/data/{api_version}/WhoAmI"
+api_response = requests.get(api_url, headers=headers)
+print(api_response.json())
